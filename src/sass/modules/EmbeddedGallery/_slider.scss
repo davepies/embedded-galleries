@@ -1,0 +1,32 @@
+$egSliderBg : grey;
+
+.EmbeddedGallery {
+  overflow: hidden;
+  width: 50%;
+}
+
+.EmbeddedGallery-slider {
+  float: left;
+  margin: 0;
+  padding: .5em;
+
+  background: $egSliderBg;
+
+  list-style-type: none;
+
+  //@TODO: This should be set by js
+  width: 700px;
+}
+
+.EmbeddedGallery-item {
+  float: left;
+  margin-right: .5em;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  img {
+    display: block;
+  }
+}
