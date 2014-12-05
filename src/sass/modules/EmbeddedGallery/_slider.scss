@@ -1,8 +1,10 @@
-$egSliderBg : grey;
+$egSliderBg: lightgrey;
 
 .EmbeddedGallery {
   overflow: hidden;
   width: 50%;
+  border-radius: 4px;
+  background: $egSliderBg;
 }
 
 .EmbeddedGallery-slider {
@@ -10,12 +12,11 @@ $egSliderBg : grey;
   margin: 0;
   padding: .5em;
 
-  background: $egSliderBg;
-
+  //@TODO: This should be set by js
+  width: 712px;
   list-style-type: none;
 
-  //@TODO: This should be set by js
-  width: 700px;
+  transition: -webkit-transform .25s ease;
 }
 
 .EmbeddedGallery-item {
@@ -28,5 +29,6 @@ $egSliderBg : grey;
 
   img {
     display: block;
+    border-radius: 4px;
   }
 }
