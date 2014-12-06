@@ -2,7 +2,7 @@ $egSliderBg: lightgrey;
 
 .EmbeddedGallery {
   overflow: hidden;
-  width: 50%;
+  // width: 50%;
   border-radius: 4px;
   background: $egSliderBg;
 }
@@ -16,7 +16,7 @@ $egSliderBg: lightgrey;
   width: 712px;
   list-style-type: none;
 
-  transition: -webkit-transform .25s ease;
+  // transition: -webkit-transform .25s ease;
 }
 
 .EmbeddedGallery-item {
