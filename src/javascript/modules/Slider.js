@@ -42,9 +42,24 @@ function Slider (containerEl) {
 
 }
 
-
+/*
+ * Default options
+ */
 Slider.defaults = {
   RESISTANCE_LEVEL: 25
+};
+
+/*
+ * Listeners
+ */
+Slider.eventListeners = {
+  onPanChangeX: function (e) {
+    this._setCurrX(e.deltaX, e.isFinal);
+    this.moveTo(this.currX);
+  },
+  onPanEnd: function (e) {
+    this.prevDelta = 0;
+  }
 };
 
 
@@ -56,19 +71,8 @@ Slider.defaults = {
  */
 Slider.prototype._startListening = function () {
 
-  // handlers
-  function onPanX(e) {
-    this._setCurrX(e.deltaX, e.isFinal);
-    this.moveTo(this.currX);
-  }
-
-  // reset delta
-  function onPanEnd(e) {
-    this.prevDelta = 0;
-  }
-
-  this.interactiveEl.on('panleft panright', onPanX.bind(this));
-  this.interactiveEl.on('panend', onPanEnd.bind(this));
+  this.interactiveEl.on('panleft panright', Slider.eventListeners.onPanChangeX.bind(this));
+  this.interactiveEl.on('panend', Slider.eventListeners.onPanEnd.bind(this));
 
 };
 
