@@ -1,0 +1,34 @@
+$egSliderBg: lightgrey;
+
+.EmbeddedGallery {
+  overflow: hidden;
+  // width: 50%;
+  border-radius: 4px;
+  background: $egSliderBg;
+}
+
+.EmbeddedGallery-slider {
+  float: left;
+  margin: 0;
+  padding: .5em;
+
+  //@TODO: This should be set by js
+  width: 712px;
+  list-style-type: none;
+
+  // transition: -webkit-transform .25s ease;
+}
+
+.EmbeddedGallery-item {
+  float: left;
+  margin-right: .5em;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  img {
+    display: block;
+    border-radius: 4px;
+  }
+}
