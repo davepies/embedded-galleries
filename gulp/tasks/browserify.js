@@ -16,7 +16,7 @@ var handleErrors = require('../util/handleErrors');
 var source       = require('vinyl-source-stream');
 var config       = require('../config').browserify;
 
-gulp.task('browserify', ['jest'], function(callback) {
+gulp.task('browserify', ['jshint', 'jest'], function(callback) {
 
   var bundleQueue = config.bundleConfigs.length;
 

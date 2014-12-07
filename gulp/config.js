@@ -1,3 +1,8 @@
+/**
+ * 
+ *
+ * @return {undefined}
+ */
 var dest = "./build";
 var src = './src';
 
@@ -35,6 +40,9 @@ module.exports = {
   jest: {
       src: src + '/**/__tests__/',
       testFiles: src + '/**/__tests__/*.js'
+  },
+  jshint: {
+    src: [src + '/javascript/**/*.js', '!**/__tests__/**/*.js']
   },
   browserify: {
     // Enable source maps
