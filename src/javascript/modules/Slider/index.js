@@ -5,6 +5,7 @@
  */
 
 var hammer = require('hammerjs');
+var Lightbox = require('./../Lightbox');
 
 function error (msg) {
   throw new Error(msg);

@@ -1,6 +1,6 @@
-jest.dontMock('../Slider');
+jest.dontMock('../');
 
-var Slider = require('../Slider');
+var Slider = require('../');
 
 describe('Slider Module', function () {
 
