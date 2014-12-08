@@ -7,7 +7,7 @@
 var hammer = require('hammerjs');
 
 function error (msg) {
-  throw new Error(msg);
+    throw new Error(msg);
 }
 
 
@@ -21,53 +21,65 @@ function error (msg) {
  */
 function Slider (containerEl) {
 
-  if (!(containerEl instanceof HTMLElement)) {
-    error('First parameter must be of type HTMLElement');
-  }
+    if (!(containerEl instanceof HTMLElement)) {
+        error('First parameter must be of type HTMLElement');
+    }
 
-  this.containerEl = containerEl;
-  this.containerWidth = this.containerEl.getBoundingClientRect().width || container.offsetWidth;
+    this.containerEl = containerEl;
+    this.panEl = hammer(containerEl);
+    this.sliderEl = containerEl.children[0];
 
-  this.sliderEl = containerEl.children[0];
-  this.sliderWidth = this.sliderEl.getBoundingClientRect().width || container.offsetWidth;
+    this.currX = 0;
+    this.nextX = 0;
+    this.prevDelta = 0;
 
-  this.interactiveEl = hammer(containerEl);
-
-  this.currX = 0;
-  this.prevDelta = 0;
-
-  this._startListening();
-
-  this._preventImageDrag();
+    this._setWidths();
+    this._startListening();
+    this._preventImageDrag();
 
 }
+
 
 /*
  * Default options
  */
 Slider.defaults = {
-  RESISTANCE_LEVEL: 15
+    RESISTANCE_LEVEL: 15
 };
+
 
 /*
  * Listeners
  */
 Slider.eventListeners = {
 
-  onPanChangeX: function (e) {
-    this.currX = this._calcCurrX(e.deltaX);
-    this._slide();
-  },
-  onPanEnd: function (e) {
+    onPanChangeX: function (e) {
+        this._setNextX(e.deltaX);
+        this._moveToNextX();
+    },
+    onPanEnd: function (e) {
 
-    if (this._leftBorderReached || this._rightBorderReached) {
-      this._snapBack();
+        if (this._leftBorderReached || this._rightBorderReached) {
+            this._snapBack();
+        }
+
+        // reset delta - this is being used to calculate the x movement
+        this.prevDelta = 0;
+
     }
 
-    // reset delta - this is being used to calculate the x movement
-    this.prevDelta = 0;
+};
 
-  }
+
+/**
+ * Calculates and sets the widths of the container and slider elements
+ *
+ * @return {undefined}
+ */
+Slider.prototype._setWidths = function () {
+
+    this.containerWidth = this.containerEl.getBoundingClientRect().width || this.containerEl.offsetWidth;
+    this.sliderWidth = this.sliderEl.getBoundingClientRect().width || this.sliderWidth.offsetWidth;
 
 };
 
@@ -80,18 +92,29 @@ Slider.eventListeners = {
  */
 Slider.prototype._snapBack = function () {
 
-  if (this._leftBorderReached) {
-    this.currX = 0;
-    this._leftBorderReached = false;
-  }
+    if (this._leftBorderReached) {
+        this.nextX = 0;
+    }
 
-  if (this._rightBorderReached) {
-    this.currX = -(this.sliderWidth - this.containerWidth);
+    // if container is bigger than slider no snapping to right edge
+    if (this._rightBorderReached) {
+        this.nextX = -(this.sliderWidth - this.containerWidth);
+    }
+
+    this._resetBorderReached();
+    this._moveToNextX();
+
+};
+
+
+/**
+ *  Resets border reachead booleans
+ *
+ * @return {undefined}
+ */
+Slider.prototype._resetBorderReached = function () {
     this._rightBorderReached = false;
-  }
-
-  this._move();
-
+    this._leftBorderReached = false;
 };
 
 
@@ -103,33 +126,10 @@ Slider.prototype._snapBack = function () {
  */
 Slider.prototype._startListening = function () {
 
-  this.interactiveEl.on('panleft panright', Slider.eventListeners.onPanChangeX.bind(this));
-  this.interactiveEl.on('panend', Slider.eventListeners.onPanEnd.bind(this));
+    window.onresize = this._setWidths.bind(this);
 
-};
-
-
-/**
- * Sliding Action
- *
- * @private
- * @return {undefined}
- */
-Slider.prototype._slide = function () {
-
-  var borderReached = this._borderReached(this.currX);
-
-  switch(borderReached) {
-    case 0:
-      break;
-    case -1:
-      this._leftBorderReached = true;
-      break;
-    case 1:
-      this._rightBorderReached = true;
-  }
-
-  this._move();
+    this.panEl.on('panleft panright', Slider.eventListeners.onPanChangeX.bind(this));
+    this.panEl.on('panend', Slider.eventListeners.onPanEnd.bind(this));
 
 };
 
@@ -141,31 +141,34 @@ Slider.prototype._slide = function () {
  * @param x
  * @return {undefined}
  */
-Slider.prototype._move = function () {
+Slider.prototype._moveToNextX = function () {
 
-  this.sliderEl.style.webkitTransform = "translate3d("+ this.currX +"px,0,0)";
+    this.sliderEl.style.webkitTransform = "translate3d("+ this.nextX +"px,0,0)";
+    this.currX = this.nextX;
 
 };
 
 
 /**
  * Checks if either the right or left border has been reached
- * returns left: -1 right: 1 - otherwise 0
  *
  * @param x
  * @return {undefined}
  */
-Slider.prototype._borderReached = function (x) {
+Slider.prototype._checkIfBorderReached = function (nextX) {
 
-  if (x > 0) {
-    return -1;
-  }
+        // if the container is bigger than the slider then never scroll to right
+        if(this.containerWidth > this.sliderWidth || nextX > 0) {
+            this._leftBorderReached = true;
+            return true;
+        }
 
-  if (Math.abs(x) + this.containerWidth > this.sliderWidth) {
-    return 1;
-  }
+        if(Math.abs(nextX) + this.containerWidth > this.sliderWidth) {
+            this._rightBorderReached = true;
+            return true;
+        }
 
-  return 0;
+        return false;
 
 };
 
@@ -179,20 +182,21 @@ Slider.prototype._borderReached = function (x) {
  * @param isFinal
  * @return {undefined}
  */
-Slider.prototype._calcCurrX = function (deltaX) {
+Slider.prototype._setNextX = function (deltaX) {
 
-  var x, borderReached;
+    var nextX, borderReached;
 
-  x = this.currX + deltaX - this.prevDelta;
-  borderReached = this._borderReached(x);
+    nextX = this.currX + deltaX - this.prevDelta;
 
-  if (borderReached === -1 || borderReached === 1) {
-    x = this.currX + ((deltaX - this.prevDelta) / (Math.abs(deltaX) / this.sliderWidth + Slider.defaults.RESISTANCE_LEVEL));
-  }
+    borderReached = this._checkIfBorderReached(nextX);
 
-  this.prevDelta = deltaX;
+    if (borderReached) {
+        nextX = this.currX + ((deltaX - this.prevDelta) / (Math.abs(deltaX) / this.sliderWidth + Slider.defaults.RESISTANCE_LEVEL));
+    }
 
-  return x;
+    this.prevDelta = deltaX;
+    this.nextX = nextX;
+
 
 };
 
@@ -205,17 +209,17 @@ Slider.prototype._calcCurrX = function (deltaX) {
  */
 Slider.prototype._preventImageDrag = function () {
 
-  var images = this.containerEl.querySelectorAll('img');
+    var images = this.containerEl.querySelectorAll('img');
 
-  function preventImageDrag (e) {
-    return false;
-  }
+    function preventImageDrag (e) {
+        return false;
+    }
 
-  [].slice.call(images).forEach(function (imgEl) {
+    [].slice.call(images).forEach(function (imgEl) {
 
-    imgEl.ondragstart = preventImageDrag;
+        imgEl.ondragstart = preventImageDrag;
 
-  });
+    });
 
 };
 
