@@ -1,0 +1,48 @@
+ul.EmbeddedGallery-lightbox {
+
+	position: absolute;
+	top: 0;
+	background: rgba(0,0,0,0.8);
+	display: none;
+	width: 100%;
+	padding: 0 0 20px;
+	margin: 0;
+
+	&.active {
+
+		display: block;
+
+	}
+
+	li { 
+
+		text-align: center;
+
+		img {
+
+			width: 100%;
+			max-width: 650px;
+			min-width: 320px;
+			margin: 0 auto;
+			display: block;
+
+		}
+
+		p.caption {
+		
+			color: #333;
+			font-family: Georgia, serif;
+			font-style: italic;
+			font-size: 12px;
+			max-width: 630px;
+			min-width: 300px;
+			margin: 0 auto;
+			padding: 10px 10px 10px;
+			background: #fff;
+
+		}
+
+	}
+
+}
+
