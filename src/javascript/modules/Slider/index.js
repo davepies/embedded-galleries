@@ -5,6 +5,7 @@
  */
 
 var hammer = require('hammerjs');
+var domUtils = require('../../utils').dom;
 
 function error (msg) {
     throw new Error(msg);
@@ -83,7 +84,9 @@ Slider.eventListeners = {
  * @return {undefined}
  */
 Slider.prototype._getGalleryItems = function () {
-    return this.sliderEl.querySelectorAll('.galleryItem');
+
+    return this.sliderEl.querySelectorAll('.' + this.options.classNames.galleryItem);
+
 };
 
 
@@ -94,8 +97,8 @@ Slider.prototype._getGalleryItems = function () {
  */
 Slider.prototype._setWidths = function () {
 
-    this.containerWidth = this.containerEl.getBoundingClientRect().width || this.containerEl.offsetWidth;
-    this.sliderWidth = this.sliderEl.getBoundingClientRect().width || this.sliderWidth.offsetWidth;
+    this.containerWidth = domUtils.getElWidth(this.containerEl);
+    this.sliderWidth = domUtils.getElWidth(this.containerEl);
 
 };
 
