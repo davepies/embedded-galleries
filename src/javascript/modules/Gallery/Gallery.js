@@ -5,12 +5,8 @@
  */
 
 var hammer = require('hammerjs');
+var errUtils = require('../../utils').error;
 var domUtils = require('../../utils').dom;
-
-function error (msg) {
-    throw new Error(msg);
-}
-
 
 /**
  * Sets up a sliding gallery within the given element
@@ -23,7 +19,7 @@ function error (msg) {
 function Slider (containerEl) {
 
     if (!(containerEl instanceof HTMLElement)) {
-        error('First parameter must be of type HTMLElement');
+        errUtils.throwError('First parameter must be of type HTMLElement');
     }
 
     // @TODO: Pass in options and merge
@@ -52,7 +48,7 @@ function Slider (containerEl) {
 Slider.defaults = {
     RESISTANCE_LEVEL: 15,
     classNames: {
-      galleryItem: 'EmbeddedGallery-item'
+        galleryItem: 'EmbeddedGallery-item'
     }
 };
 
@@ -97,8 +93,11 @@ Slider.prototype._getGalleryItems = function () {
  */
 Slider.prototype._setWidths = function () {
 
-    this.containerWidth = domUtils.getElWidth(this.containerEl);
-    this.sliderWidth = domUtils.getElWidth(this.containerEl);
+    this.sliderWidth = domUtils.getElsWidth(this.galleryItems);
+
+    this.sliderEl.style.width = this.sliderWidth + 'px';
+
+    this.containerInnerWidth = domUtils.getElInnerWidth(this.containerEl);
 
 };
 
@@ -117,7 +116,7 @@ Slider.prototype._snapBack = function () {
 
     // if container is bigger than slider no snapping to right edge
     if (this._rightBorderReached) {
-        this.nextX = -(this.sliderWidth - this.containerWidth);
+        this.nextX = -(this.sliderWidth - this.containerInnerWidth);
     }
 
     this._resetBorderReached();
@@ -176,18 +175,18 @@ Slider.prototype._moveToNextX = function () {
  */
 Slider.prototype._checkIfBorderReached = function (nextX) {
 
-        // if the container is bigger than the slider then never scroll to right
-        if(this.containerWidth > this.sliderWidth || nextX > 0) {
-            this._leftBorderReached = true;
-            return true;
-        }
+    // if the container is bigger than the slider then never scroll to right
+    if(this.containerInnerWidth > this.sliderWidth || nextX > 0) {
+        this._leftBorderReached = true;
+        return true;
+    }
 
-        if(Math.abs(nextX) + this.containerWidth > this.sliderWidth) {
-            this._rightBorderReached = true;
-            return true;
-        }
+    if(Math.abs(nextX) + this.containerInnerWidth  > this.sliderWidth) {
+        this._rightBorderReached = true;
+        return true;
+    }
 
-        return false;
+    return false;
 
 };
 

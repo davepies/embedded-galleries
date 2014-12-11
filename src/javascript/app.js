@@ -1,6 +1,5 @@
 var hammer = require('hammerjs');
-var Slider = require('./modules/Slider');
+var Gallery = require('./modules/Gallery');
 var Lightbox = require('./modules/Lightbox');
-
-var gallerySlider = new Slider(document.querySelector('.EmbeddedGallery'));
+var gallery = new Gallery(document.querySelector('.EmbeddedGallery'));
 var galleryLightbox = new Lightbox(document.querySelector('.EmbeddedGallery'));

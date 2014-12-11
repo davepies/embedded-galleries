@@ -2,18 +2,17 @@ $egSliderBg: lightgrey;
 
 .EmbeddedGallery {
   overflow: hidden;
-  // width: 50%;
   border-radius: 4px;
   background: $egSliderBg;
+  padding: .5em;
 }
 
 .EmbeddedGallery-slider {
   float: left;
   margin: 0;
-  padding: .5em;
+  padding: 0;
 
   //@TODO: This should be set by js
-  width: 712px;
   list-style-type: none;
 
   // transition: -webkit-transform .25s ease;
@@ -21,10 +20,10 @@ $egSliderBg: lightgrey;
 
 .EmbeddedGallery-item {
   float: left;
-  margin-right: .5em;
+  padding-right: .5em;
 
   &:last-child {
-    margin-right: 0;
+    padding-right: 0;
   }
 
   img {
