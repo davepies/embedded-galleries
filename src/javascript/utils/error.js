@@ -1,5 +1,7 @@
 module.exports = {
-    throwError: function (msg) {
-        throw new Error(msg);
+
+    throwError: function (msg, moduleName) {
+        throw new Error(moduleName || '' + msg);
     }
+
 };

@@ -1,35 +1,41 @@
 /*
- * Embedded Galleries Slider
- * @module Slider
- * @author david.pisek@news.com.au
+ * Embedded Galleries Gallery
+ * @module Gallery
+ *
  */
 
 var hammer = require('hammerjs');
+
+var GalleryItemCollection = require('./GalleryItemCollection');
+
 var errUtils = require('../../utils').error;
 var domUtils = require('../../utils').dom;
+
+var MODULE_NAME = 'GalleryItemCollection';
+
 
 /**
  * Sets up a sliding gallery within the given element
  *
  * @constructor
- * @alias module:slider
+ * @alias module:Gallery
  * @param {domElement} containerEl
  * @return {undefined}
  */
-function Slider (containerEl) {
+function Gallery (containerEl) {
 
     if (!(containerEl instanceof HTMLElement)) {
         errUtils.throwError('First parameter must be of type HTMLElement');
     }
 
     // @TODO: Pass in options and merge
-    this.options = Slider.defaults;
+    this.options = Gallery.defaults;
 
     this.containerEl = containerEl;
     this.panEl = hammer(containerEl);
-    this.sliderEl = containerEl.children[0];
+    this.galleryEl = containerEl.children[0];
 
-    this.galleryItems = this._getGalleryItems();
+    this.galleryItemCollection = new GalleryItemCollection(this._getGalleryItems());
 
     this.currX = 0;
     this.nextX = 0;
@@ -45,10 +51,11 @@ function Slider (containerEl) {
 /*
  * Default options
  */
-Slider.defaults = {
+Gallery.defaults = {
     RESISTANCE_LEVEL: 15,
     classNames: {
-        galleryItem: 'EmbeddedGallery-item'
+        galleryItem: 'EmbeddedGallery-item',
+        animating: 'animating'
     }
 };
 
@@ -56,7 +63,7 @@ Slider.defaults = {
 /*
  * Listeners
  */
-Slider.eventListeners = {
+Gallery.eventListeners = {
 
     onPanChangeX: function (e) {
         this._setNextX(e.deltaX);
@@ -75,27 +82,27 @@ Slider.eventListeners = {
 
 
 /**
- * Calculates and sets the widths of the container and slider elements
+ * Calculates and sets the widths of the container and Gallery elements
  *
  * @return {undefined}
  */
-Slider.prototype._getGalleryItems = function () {
+Gallery.prototype._getGalleryItems = function () {
 
-    return this.sliderEl.querySelectorAll('.' + this.options.classNames.galleryItem);
+    return this.galleryEl.querySelectorAll('.' + this.options.classNames.galleryItem);
 
 };
 
 
 /**
- * Calculates and sets the widths of the container and slider elements
+ * Calculates and sets the widths of the container and Gallery elements
  *
  * @return {undefined}
  */
-Slider.prototype._setWidths = function () {
+Gallery.prototype._setWidths = function () {
 
-    this.sliderWidth = domUtils.getElsWidth(this.galleryItems);
+    this.galleryWidth = domUtils.getElsWidth(this._getGalleryItems());
 
-    this.sliderEl.style.width = this.sliderWidth + 'px';
+    this.galleryEl.style.width = this.galleryWidth + 'px';
 
     this.containerInnerWidth = domUtils.getElInnerWidth(this.containerEl);
 
@@ -103,20 +110,20 @@ Slider.prototype._setWidths = function () {
 
 
 /**
- * Brings the slider back into position after one of the horizontal borders
+ * Brings the Gallery back into position after one of the horizontal borders
  * have been crossed
  *
  * @return {undefined}
  */
-Slider.prototype._snapBack = function () {
+Gallery.prototype._snapBack = function () {
 
     if (this._leftBorderReached) {
         this.nextX = 0;
     }
 
-    // if container is bigger than slider no snapping to right edge
+    // if container is bigger than Gallery no snapping to right edge
     if (this._rightBorderReached) {
-        this.nextX = -(this.sliderWidth - this.containerInnerWidth);
+        this.nextX = -(this.galleryWidth - this.containerInnerWidth);
     }
 
     this._resetBorderReached();
@@ -130,9 +137,11 @@ Slider.prototype._snapBack = function () {
  *
  * @return {undefined}
  */
-Slider.prototype._resetBorderReached = function () {
+Gallery.prototype._resetBorderReached = function () {
+
     this._rightBorderReached = false;
     this._leftBorderReached = false;
+
 };
 
 
@@ -142,26 +151,26 @@ Slider.prototype._resetBorderReached = function () {
  * @private
  * @return {undefined}
  */
-Slider.prototype._startListening = function () {
+Gallery.prototype._startListening = function () {
 
     window.onresize = this._setWidths.bind(this);
 
-    this.panEl.on('panleft panright', Slider.eventListeners.onPanChangeX.bind(this));
-    this.panEl.on('panend', Slider.eventListeners.onPanEnd.bind(this));
+    this.panEl.on('panleft panright', Gallery.eventListeners.onPanChangeX.bind(this));
+    this.panEl.on('panend', Gallery.eventListeners.onPanEnd.bind(this));
 
 };
 
 
 /**
- * Moves the slider to position x
+ * Moves the Gallery to position x
  *
  * @private
  * @param x
  * @return {undefined}
  */
-Slider.prototype._moveToNextX = function () {
+Gallery.prototype._moveToNextX = function () {
 
-    this.sliderEl.style.webkitTransform = "translate3d("+ this.nextX +"px,0,0)";
+    this.galleryEl.style.webkitTransform = "translate3d("+ this.nextX +"px,0,0)";
     this.currX = this.nextX;
 
 };
@@ -173,15 +182,15 @@ Slider.prototype._moveToNextX = function () {
  * @param x
  * @return {undefined}
  */
-Slider.prototype._checkIfBorderReached = function (nextX) {
+Gallery.prototype._checkIfBorderReached = function (nextX) {
 
-    // if the container is bigger than the slider then never scroll to right
-    if(this.containerInnerWidth > this.sliderWidth || nextX > 0) {
+    // if the container is bigger than the Gallery then never scroll to right
+    if(this.containerInnerWidth > this.galleryWidth || nextX > 0) {
         this._leftBorderReached = true;
         return true;
     }
 
-    if(Math.abs(nextX) + this.containerInnerWidth  > this.sliderWidth) {
+    if(Math.abs(nextX) + this.containerInnerWidth  > this.galleryWidth) {
         this._rightBorderReached = true;
         return true;
     }
@@ -200,7 +209,7 @@ Slider.prototype._checkIfBorderReached = function (nextX) {
  * @param isFinal
  * @return {undefined}
  */
-Slider.prototype._setNextX = function (deltaX) {
+Gallery.prototype._setNextX = function (deltaX) {
 
     var nextX, borderReached;
 
@@ -209,7 +218,7 @@ Slider.prototype._setNextX = function (deltaX) {
     borderReached = this._checkIfBorderReached(nextX);
 
     if (borderReached) {
-        nextX = this.currX + ((deltaX - this.prevDelta) / (Math.abs(deltaX) / this.sliderWidth + this.options.RESISTANCE_LEVEL));
+        nextX = this.currX + ((deltaX - this.prevDelta) / (Math.abs(deltaX) / this.galleryWidth + this.options.RESISTANCE_LEVEL));
     }
 
     this.prevDelta = deltaX;
@@ -224,7 +233,7 @@ Slider.prototype._setNextX = function (deltaX) {
  * @private
  * @return {undefined}
  */
-Slider.prototype._preventImageDrag = function () {
+Gallery.prototype._preventImageDrag = function () {
 
     var images = this.containerEl.querySelectorAll('img');
 
@@ -241,4 +250,4 @@ Slider.prototype._preventImageDrag = function () {
 };
 
 
-module.exports = Slider;
+module.exports = Gallery;
