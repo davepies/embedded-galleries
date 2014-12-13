@@ -15,7 +15,9 @@ $egSliderBg: lightgrey;
   //@TODO: This should be set by js
   list-style-type: none;
 
-  // transition: -webkit-transform .25s ease;
+  &.animating {
+    transition: -webkit-transform .25s ease;
+  }
 }
 
 .EmbeddedGallery-item {

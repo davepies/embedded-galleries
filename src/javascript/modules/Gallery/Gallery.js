@@ -38,7 +38,6 @@ function Gallery (containerEl) {
     this.galleryItemCollection = new GalleryItemCollection(this._getGalleryItems());
 
     this.currX = 0;
-    this.nextX = 0;
     this.prevDelta = 0;
 
     this._setWidths();
@@ -65,13 +64,16 @@ Gallery.defaults = {
  */
 Gallery.eventListeners = {
 
-    onPanChangeX: function (e) {
-        this._setNextX(e.deltaX);
-        this._moveToNextX();
+    onPanChangeX: function moveX (e) {
+        var nextX = this._calculateNextX(e.deltaX);
+        this._moveX(nextX);
     },
-    onPanEnd: function (e) {
-        if (this._leftBorderReached || this._rightBorderReached) {
+
+    onPanEnd: function snap (e) {
+        if (this._borderReached) {
             this._snapBack();
+        } else {
+            this._snapToNextItem(e.deltaX);
         }
 
         // reset delta - this is being used to calculate the x movement
@@ -79,6 +81,61 @@ Gallery.eventListeners = {
     }
 
 };
+
+
+/**
+ * Brings the Gallery back into position after one of the horizontal borders
+ * have been crossed
+ *
+ * @return {undefined}
+ */
+Gallery.prototype._snapBack = function () {
+
+    var nextX;
+
+    if (this._leftBorderReached) {
+        nextX = 0;
+    }
+
+    // if container is bigger than Gallery no snapping to right edge
+    if (this._rightBorderReached) {
+        nextX = -(this.galleryWidth - this.containerInnerWidth);
+    }
+
+    this._resetBorderReached();
+    this._moveX(nextX, { animated: true });
+
+};
+
+
+/**
+ * Moves the Gallery to the next item
+ *
+ * @return {undefined}
+ */
+Gallery.prototype._snapToNextItem = function (deltaX) {
+
+    var nextX = this._calculateNextX(deltaX);
+    var nextItem =this.galleryItemCollection.getItemByXOffset(nextX);
+    var borderReached = false;
+
+    if (deltaX < 0) {
+        nextItem += 1;
+    }
+
+    nextX = -(this.galleryItemCollection.getOffsetForItem(nextItem).xOffset);
+
+    this._checkIfBorderReached(nextX);
+
+    if (this._borderReached) {
+        this._snapBack();
+    } else {
+        this._moveX(nextX, { animated: true });
+    }
+
+};
+
+
 
 
 /**
@@ -110,38 +167,15 @@ Gallery.prototype._setWidths = function () {
 
 
 /**
- * Brings the Gallery back into position after one of the horizontal borders
- * have been crossed
- *
- * @return {undefined}
- */
-Gallery.prototype._snapBack = function () {
-
-    if (this._leftBorderReached) {
-        this.nextX = 0;
-    }
-
-    // if container is bigger than Gallery no snapping to right edge
-    if (this._rightBorderReached) {
-        this.nextX = -(this.galleryWidth - this.containerInnerWidth);
-    }
-
-    this._resetBorderReached();
-    this._moveToNextX();
-
-};
-
-
-/**
  *  Resets border reachead booleans
  *
  * @return {undefined}
  */
 Gallery.prototype._resetBorderReached = function () {
 
+    this._borderReached = false;
     this._rightBorderReached = false;
     this._leftBorderReached = false;
-
 };
 
 
@@ -168,10 +202,18 @@ Gallery.prototype._startListening = function () {
  * @param x
  * @return {undefined}
  */
-Gallery.prototype._moveToNextX = function () {
+Gallery.prototype._moveX = function (nextX, options) {
 
-    this.galleryEl.style.webkitTransform = "translate3d("+ this.nextX +"px,0,0)";
-    this.currX = this.nextX;
+    options = options || {};
+
+    if (options.animated) {
+        this.galleryEl.classList.add(this.options.classNames.animating);
+    } else {
+        this.galleryEl.classList.remove(this.options.classNames.animating);
+    }
+
+    this.galleryEl.style.webkitTransform = "translate3d("+ nextX +"px,0,0)";
+    this.currX = nextX;
 
 };
 
@@ -187,15 +229,13 @@ Gallery.prototype._checkIfBorderReached = function (nextX) {
     // if the container is bigger than the Gallery then never scroll to right
     if(this.containerInnerWidth > this.galleryWidth || nextX > 0) {
         this._leftBorderReached = true;
-        return true;
+        this._borderReached = true;
     }
 
     if(Math.abs(nextX) + this.containerInnerWidth  > this.galleryWidth) {
         this._rightBorderReached = true;
-        return true;
+        this._borderReached = true;
     }
-
-    return false;
 
 };
 
@@ -209,20 +249,21 @@ Gallery.prototype._checkIfBorderReached = function (nextX) {
  * @param isFinal
  * @return {undefined}
  */
-Gallery.prototype._setNextX = function (deltaX) {
+Gallery.prototype._calculateNextX = function (deltaX) {
 
     var nextX, borderReached;
 
     nextX = this.currX + deltaX - this.prevDelta;
 
-    borderReached = this._checkIfBorderReached(nextX);
+    this._checkIfBorderReached(nextX);
 
-    if (borderReached) {
+    if (this._borderReached) {
         nextX = this.currX + ((deltaX - this.prevDelta) / (Math.abs(deltaX) / this.galleryWidth + this.options.RESISTANCE_LEVEL));
     }
 
     this.prevDelta = deltaX;
-    this.nextX = nextX;
+
+    return nextX;
 
 };
 

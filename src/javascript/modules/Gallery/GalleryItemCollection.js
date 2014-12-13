@@ -66,4 +66,20 @@ GalleryItemCollection.prototype.getOffsetForItem = function (n) {
 };
 
 
+GalleryItemCollection.prototype.getItemByXOffset = function (xOffset) {
+
+    var currentItem = 0;
+
+    this._itemsDimensionsMap.forEach(function (item, i) {
+        if (Math.abs(xOffset) > item.xOffset &&
+            Math.abs(xOffset) < (item.width + item.xOffset)) {
+            currentItem = i;
+        }
+    });
+
+    return currentItem;
+
+};
+
+
 module.exports = GalleryItemCollection;
