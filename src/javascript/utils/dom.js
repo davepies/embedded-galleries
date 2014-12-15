@@ -40,6 +40,13 @@ module.exports = {
         }, this);
 
         return width;
+    },
+
+    getElYoffset: function(el) {
+
+    	return el.offsetTop;
+
     }
+
 
 };

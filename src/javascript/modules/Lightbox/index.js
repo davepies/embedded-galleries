@@ -4,8 +4,13 @@
  * @author erik.panchenko@news.com.au
  */
 
+var errUtils = require('../../utils').error;
+var domUtils = require('../../utils').dom; 
+
 function error (msg) {
-  throw new Error(msg);
+
+    throw new Error(msg);
+
 }
 
 
@@ -19,15 +24,15 @@ function error (msg) {
  */
 function Lightbox (containerEl) {
 
-  if (!(containerEl instanceof HTMLElement)) {
-    error('First parameter must be of type HTMLElement');
-  }
+    if (!(containerEl instanceof HTMLElement)) {
+        error('First parameter must be of type HTMLElement');
+    }
 
-  this.containerEl = containerEl;
+    this.containerEl = containerEl;
 
-  this._constructHTML();
+    this._constructHTML();
 
-  this._startListening();
+    this._startListening();
 
 }
 
@@ -39,26 +44,26 @@ function Lightbox (containerEl) {
  */
 Lightbox.prototype._constructHTML = function () {
 
-  var lightbox = document.createElement('ul');
-  lightbox.classList.add('EmbeddedGallery-lightbox');
+    var lightbox = document.createElement('div');
+    lightbox.classList.add('EmbeddedGallery-lightbox');
+    lightbox.innerHTML += '<div class="overlay"></div>';
+    lightbox.innerHTML += '<div class="nav"><a href="#" class="close">close</a></div>';
 
-  var items = this._getLightboxItems();   
-  console.log('items count: '+items.length); 
-  for (var i = 0; i < items.length; ++i) {
-      lightbox.innerHTML += '<li><img src='+items[i].getAttribute('data-src')+'><p class="caption">'+items[i].getAttribute('data-caption')+'</p></li>';
-  }
-  this.containerEl.appendChild(lightbox);
+    var items = this._getLightboxItems();   
+    for (var i = 0; i < items.length; ++i) {
+        lightbox.innerHTML += '<figure><img src='+items[i].getAttribute('data-src')+'><figcaption>'+items[i].getAttribute('data-caption')+'</figcaption></figure>';
+    }
+    this.containerEl.appendChild(lightbox);
 
-  var lightbox_trigger = document.createElement('a');
-  lightbox_trigger.href = "#";
-  lightbox_trigger.classList.add('EmbeddedGallery-lightbox-open');
-  lightbox_trigger.innerHTML += 'lightbox';
-  this.containerEl.appendChild(lightbox_trigger);  
+    /*var lightbox_open = document.createElement('div');
+    lightbox_open.classList.add('lightbox-open');
+    lightbox_open.innerHTML += '<a href="#">open lightbox</a>';
+    this.containerEl.appendChild(lightbox_open);  */
 
 };
 
 /**
- * Builds the lightbox HTML markup.
+ * Gets all images and their corresponding captions for the lightbox.
  *
  * @private
  * @param x
@@ -66,20 +71,74 @@ Lightbox.prototype._constructHTML = function () {
  */
 Lightbox.prototype._getLightboxItems = function () {
 
-  var items = this.containerEl.querySelectorAll('li img');
-  return items;
+    var items = this.containerEl.querySelectorAll('li img');
+    return items;
 
 };
 
-Lightbox.prototype.open = function () {
+/**
+ * Opens lightbox.
+ *
+ * @public
+ * @return {undefined}
+ */
+Lightbox.prototype.open = function (pos) {
+
+    pos = pos || 0;
 
     document.querySelector('.EmbeddedGallery-lightbox').classList.add('active');
 
+    if(pos > 0) {
+
+        this.jump(pos);
+
+    }
+
+    this._jumpTo(3);
+
 };
 
-Lightbox.prototype.close = function () {
+/**
+ * Builds the lightbox HTML markup.
+ *
+ * @private
+ * @return {undefined}
+ */
+Lightbox.prototype._close = function () {
 
     document.querySelector('.EmbeddedGallery-lightbox').classList.remove('active');
+
+};
+
+/**
+ * Scrolls the page to the position.
+ *
+ * @private
+ * @param jump
+ * @return {undefined}
+ */
+Lightbox.prototype._jumpTo = function (pos) {
+
+    var figures = document.querySelectorAll('.EmbeddedGallery-lightbox figure');
+    figures = domUtils.getElArr(figures);
+    var y = domUtils.getElYoffset(figures[pos]);
+    this._scrollTo(document.body, y, 100);
+
+};
+
+Lightbox.prototype._scrollTo = function (element, to, duration) {
+
+    if (duration < 0) {
+        return;
+    }
+    var difference = to - element.scrollTop;
+    var perTick = difference / duration * 2;
+
+    setTimeout(function() {
+        element.scrollTop = element.scrollTop + perTick;
+        console.log(duration + " " + element.scrollTop + " " + perTick);
+        this._scrollTo(element, to, duration - 2);
+    }.bind(this), 10);
 
 };
 
@@ -101,7 +160,8 @@ Lightbox.eventListeners = {
  */
 Lightbox.prototype._startListening = function () {
 
-  document.querySelector('.EmbeddedGallery-lightbox-open').addEventListener('click', this.open);
+  document.querySelector('.lightbox-open').addEventListener('click', this.open.bind(this));
+  document.querySelector('.EmbeddedGallery-lightbox .close').addEventListener('click', this._close);
   //Esc button > Close
 
 };
