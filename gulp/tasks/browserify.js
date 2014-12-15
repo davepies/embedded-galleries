@@ -59,7 +59,7 @@ gulp.task('browserify', ['jshint', 'jest'], function(callback) {
 
     var reportFinished = function() {
       // Log when bundling completes
-      bundleLogger.end(bundleConfig.outputName)
+      bundleLogger.end(bundleConfig.outputName);
 
       if(bundleQueue) {
         bundleQueue--;
