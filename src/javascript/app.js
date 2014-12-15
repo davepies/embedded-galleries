@@ -1,5 +1,11 @@
-var hammer = require('hammerjs');
 var Gallery = require('./modules/Gallery');
 var Lightbox = require('./modules/Lightbox');
-var gallery = new Gallery(document.querySelector('.EmbeddedGallery'));
-var galleryLightbox = new Lightbox(document.querySelector('.EmbeddedGallery'));
+
+var galleryEl = document.querySelector('.EmbeddedGallery');
+
+var gallery = new Gallery(galleryEl);
+var lightbox = new Lightbox(galleryEl);
+
+gallery.on('tap', function (index) {
+    lightbox.open(index);
+});

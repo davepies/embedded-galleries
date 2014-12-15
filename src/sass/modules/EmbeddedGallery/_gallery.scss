@@ -12,8 +12,10 @@ $egSliderBg: lightgrey;
   margin: 0;
   padding: 0;
 
-  //@TODO: This should be set by js
   list-style-type: none;
+
+  // this will over overriden by the gallery module
+  width: 2000px;
 
   &.animating {
     transition: -webkit-transform .25s ease;
@@ -24,6 +26,8 @@ $egSliderBg: lightgrey;
   float: left;
   padding-right: .5em;
 
+  cursor: -webkit-grabbing;
+
   &:last-child {
     padding-right: 0;
   }
@@ -31,5 +35,9 @@ $egSliderBg: lightgrey;
   img {
     display: block;
     border-radius: 4px;
+    // max-width: 200px;
+    // height: auto;
+    max-height: 120px;
+    width: auto;
   }
 }

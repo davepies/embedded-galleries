@@ -8,6 +8,9 @@ var hammer = require('hammerjs');
 
 var GalleryItemCollection = require('./GalleryItemCollection');
 
+var util = require('util');
+var events = require('events');
+
 var errUtils = require('../../utils').error;
 var domUtils = require('../../utils').dom;
 
@@ -40,11 +43,16 @@ function Gallery (containerEl) {
     this.currX = 0;
     this.prevDelta = 0;
 
-    this._setWidths();
     this._startListening();
     this._preventImageDrag();
 
 }
+
+
+/*
+ * Inherit EventEmitter
+ */
+util.inherits(Gallery, events.EventEmitter);
 
 
 /*
@@ -78,6 +86,34 @@ Gallery.eventListeners = {
 
         // reset delta - this is being used to calculate the x movement
         this.prevDelta = 0;
+    },
+
+    onTap: function (e) {
+        var target = e.target;
+        var targetIndex;
+
+        // for now only images are supported
+        if (target.tagName !== "IMG") {
+            return;
+        }
+
+        targetIndex = domUtils.getIndexOfChildEl(this.galleryEl, target.parentNode);
+
+        this.emit('tap', targetIndex);
+    }
+
+};
+
+
+/*
+ * Listeners
+ */
+Gallery.prototype.handleEvent = function (e) {
+
+    switch (e.type) {
+        case 'resize':
+        case 'load':
+            this._setWidths();
     }
 
 };
@@ -187,10 +223,13 @@ Gallery.prototype._resetBorderReached = function () {
  */
 Gallery.prototype._startListening = function () {
 
-    window.onresize = this._setWidths.bind(this);
+    window.addEventListener('load', this);
+    window.addEventListener('resize', this);
 
-    this.panEl.on('panleft panright', Gallery.eventListeners.onPanChangeX.bind(this));
-    this.panEl.on('panend', Gallery.eventListeners.onPanEnd.bind(this));
+    this.panEl
+        .on('panleft panright', Gallery.eventListeners.onPanChangeX.bind(this))
+        .on('panend', Gallery.eventListeners.onPanEnd.bind(this))
+        .on('tap', Gallery.eventListeners.onTap.bind(this));
 
 };
 

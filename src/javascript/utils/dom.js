@@ -42,6 +42,10 @@ module.exports = {
         return width;
     },
 
+    getIndexOfChildEl: function (el, childEl) {
+        return [].indexOf.call(el.children, childEl);
+    },
+
     getElYoffset: function(el) {
 
     	return el.offsetTop;
