@@ -160,7 +160,6 @@ Lightbox.eventListeners = {
  */
 Lightbox.prototype._startListening = function () {
 
-  document.querySelector('.lightbox-open').addEventListener('click', this.open.bind(this));
   document.querySelector('.EmbeddedGallery-lightbox .close').addEventListener('click', this._close);
   //Esc button > Close
 

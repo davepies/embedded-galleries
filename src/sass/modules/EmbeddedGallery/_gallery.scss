@@ -1,43 +1,94 @@
 $egSliderBg: lightgrey;
+$egLoaderSize: 40px;
+
+
+@-webkit-keyframes spin {
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+
+}
+
 
 .EmbeddedGallery {
-  overflow: hidden;
-  border-radius: 4px;
-  background: $egSliderBg;
-  padding: .5em;
+
+    overflow: hidden;
+    border-radius: 4px;
+    background: $egSliderBg;
+    padding: .5em;
+    position: relative;
+
 }
+
 
 .EmbeddedGallery-slider {
-  float: left;
-  margin: 0;
-  padding: 0;
 
-  list-style-type: none;
+    float: left;
+    margin: 0;
+    padding: 0;
 
-  // this will over overriden by the gallery module
-  width: 2000px;
+    height: 200px;
 
-  &.animating {
-    transition: -webkit-transform .25s ease;
-  }
+    list-style-type: none;
+
+    // this will over overriden by the gallery module
+    width: 5000px;
+
+    &.animating {
+        transition: -webkit-transform .25s cubic-bezier(0.075, 0.82, 0.165, 1);
+    }
+
 }
 
+
 .EmbeddedGallery-item {
-  float: left;
-  padding-right: .5em;
 
-  cursor: -webkit-grabbing;
+    position: relative;
+    float: left;
+    padding-right: .5em;
 
-  &:last-child {
-    padding-right: 0;
-  }
+    height: 100%;
 
-  img {
-    display: block;
-    border-radius: 4px;
-    // max-width: 200px;
-    // height: auto;
-    max-height: 120px;
-    width: auto;
-  }
+    cursor: -webkit-grabbing;
+
+    &:last-child {
+        padding-right: 0;
+    }
+
+    img {
+        display: block;
+        border-radius: 4px;
+        max-height: 100%;
+        width: auto;
+    }
+
+    .EmbeddedGallery.loading & {
+        &:before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: calc(50% - 20px);
+            top: calc(50% - 20px);
+            width: $egLoaderSize;
+            height: $egLoaderSize;
+            border-radius: $egLoaderSize / 2;
+            -webkit-box-sizing: border-box;
+            border: solid 10px rgba(134, 134, 134, 0.2);
+            border-top-color: grey;
+            -webkit-animation: spin 1s infinite linear;
+            z-index: 10;
+        }
+
+        &:after {
+            content: '';
+            position: absolute;
+            background: white;
+            top: 0;
+            bottom: 0;
+            right: .5em;
+            left: 0;
+        }
+    }
+
 }

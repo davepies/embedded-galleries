@@ -7,14 +7,13 @@
 var hammer = require('hammerjs');
 
 var GalleryItemCollection = require('./GalleryItemCollection');
+var LazyLoader            = require('./LazyLoader');
 
-var util = require('util');
+var util   = require('util');
 var events = require('events');
 
 var errUtils = require('../../utils').error;
 var domUtils = require('../../utils').dom;
-
-var MODULE_NAME = 'GalleryItemCollection';
 
 
 /**
@@ -35,13 +34,19 @@ function Gallery (containerEl) {
     this.options = Gallery.defaults;
 
     this.containerEl = containerEl;
-    this.panEl = hammer(containerEl);
-    this.galleryEl = containerEl.children[0];
+    this.panEl       = hammer(containerEl);
+    this.galleryEl   = containerEl.children[0];
 
     this.galleryItemCollection = new GalleryItemCollection(this._getGalleryItems());
 
-    this.currX = 0;
+    this.currX     = 0;
     this.prevDelta = 0;
+
+    if (this.options.lazyLoad) {
+        this.lazyLoader = new LazyLoader(this.containerEl, {
+            spinnerEl: this.containerEl
+        });
+    }
 
     this._startListening();
     this._preventImageDrag();
@@ -60,15 +65,17 @@ util.inherits(Gallery, events.EventEmitter);
  */
 Gallery.defaults = {
     RESISTANCE_LEVEL: 15,
+    lazyLoad: true,
     classNames: {
         galleryItem: 'EmbeddedGallery-item',
-        animating: 'animating'
+        animating: 'animating',
+        loading: 'loading'
     }
 };
 
 
 /*
- * Listeners
+ * Internal Listeners
  */
 Gallery.eventListeners = {
 
@@ -97,8 +104,10 @@ Gallery.eventListeners = {
             return;
         }
 
+        // get the index of the parent el (li) element
         targetIndex = domUtils.getIndexOfChildEl(this.galleryEl, target.parentNode);
 
+        // emit tap event
         this.emit('tap', targetIndex);
     }
 
@@ -106,7 +115,7 @@ Gallery.eventListeners = {
 
 
 /*
- * Listeners
+ * DOM Listeners
  */
 Gallery.prototype.handleEvent = function (e) {
 
@@ -223,13 +232,19 @@ Gallery.prototype._resetBorderReached = function () {
  */
 Gallery.prototype._startListening = function () {
 
-    window.addEventListener('load', this);
     window.addEventListener('resize', this);
 
+    // Panel User Interactions
     this.panEl
         .on('panleft panright', Gallery.eventListeners.onPanChangeX.bind(this))
         .on('panend', Gallery.eventListeners.onPanEnd.bind(this))
         .on('tap', Gallery.eventListeners.onTap.bind(this));
+
+    if (this.options.lazyLoad) {
+        this.lazyLoader.on('imagesLoaded', this._setWidths.bind(this));
+    } else {
+        window.addEventListener('load', this);
+    }
 
 };
 
@@ -315,17 +330,17 @@ Gallery.prototype._calculateNextX = function (deltaX) {
  */
 Gallery.prototype._preventImageDrag = function () {
 
-    var images = this.containerEl.querySelectorAll('img');
+    var imagesArr = domUtils.getElArr(this.containerEl.querySelectorAll('img'));
 
-    function preventImageDrag (e) {
-        return false;
-    }
-
-    [].slice.call(images).forEach(function (imgEl) {
+    imagesArr.forEach(function (imgEl) {
 
         imgEl.ondragstart = preventImageDrag;
 
     });
+
+    function preventImageDrag (e) {
+        return false;
+    }
 
 };
 

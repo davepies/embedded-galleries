@@ -47,10 +47,7 @@ module.exports = {
     },
 
     getElYoffset: function(el) {
-
-    	return el.offsetTop;
-
+        return el.offsetTop;
     }
-
 
 };
