@@ -1,7 +1,8 @@
 {
-  "name": "gulp-starter",
+  "name": "embedded-gallery",
   "version": "0.1.1",
   "description": "Gulp starter with common tasks and scenarios",
+  "main": "src/javascript/app.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/greypants/gulp-starter.git"
