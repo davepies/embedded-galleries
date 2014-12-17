@@ -48,6 +48,7 @@ function Gallery (containerEl) {
         });
     }
 
+    this._setDimensions();
     this._startListening();
     this._preventImageDrag();
 
@@ -65,7 +66,7 @@ util.inherits(Gallery, events.EventEmitter);
  */
 Gallery.defaults = {
     RESISTANCE_LEVEL: 15,
-    lazyLoad: true,
+    lazyLoad: false,
     classNames: {
         galleryItem: 'EmbeddedGallery-item',
         animating: 'animating',
