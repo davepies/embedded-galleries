@@ -32,11 +32,6 @@ function LazyLoader (containerEl, options) {
     }
 
     imgs = containerEl.querySelectorAll('img');
-
-    if (!imgs.length) {
-        return;
-    }
-
     this.imgsToLoadArr = this._getLazyLoadImgs(imgs);
 
     if(!this.imgsToLoadArr.length) {
@@ -81,7 +76,9 @@ LazyLoader.prototype.lazyLoad = function () {
 
     this.imgsToLoadArr.forEach(function (img) {
         img.onload = checkIfAllImagesLoaded.bind(this);
+        // @TODO: add data-small-src to options
         img.setAttribute('src', img.getAttribute('data-small-src'));
+        img.removeAttribute('data-small-src');
     }, this);
 
     this._hasLoaded = true;

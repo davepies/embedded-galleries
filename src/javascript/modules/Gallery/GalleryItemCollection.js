@@ -27,12 +27,12 @@ function GalleryItemCollection (els) {
     // turn nodelist into array if not already
     this._items = domUtils.getElArr(els);
 
-    this._itemsDimensionsMap = this._getItemsDimensionsMap();
+    this.setDimensions();
 
 }
 
 
-GalleryItemCollection.prototype._getItemsDimensionsMap = function () {
+GalleryItemCollection.prototype.setDimensions = function () {
 
     var dimensionsMap = [];
     var lastOffset = 0;
@@ -47,7 +47,7 @@ GalleryItemCollection.prototype._getItemsDimensionsMap = function () {
         return item;
     });
 
-    return dimensionsMap;
+    this._itemsDimensionsMap = dimensionsMap;
 
 };
 

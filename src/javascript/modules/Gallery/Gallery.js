@@ -122,7 +122,7 @@ Gallery.prototype.handleEvent = function (e) {
     switch (e.type) {
         case 'resize':
         case 'load':
-            this._setWidths();
+            this._setDimensions();
     }
 
 };
@@ -200,7 +200,9 @@ Gallery.prototype._getGalleryItems = function () {
  *
  * @return {undefined}
  */
-Gallery.prototype._setWidths = function () {
+Gallery.prototype._setDimensions = function () {
+
+    this.galleryItemCollection.setDimensions();
 
     this.galleryWidth = domUtils.getElsWidth(this._getGalleryItems());
 
@@ -232,6 +234,7 @@ Gallery.prototype._resetBorderReached = function () {
  */
 Gallery.prototype._startListening = function () {
 
+    window.addEventListener('load', this);
     window.addEventListener('resize', this);
 
     // Panel User Interactions
@@ -241,9 +244,7 @@ Gallery.prototype._startListening = function () {
         .on('tap', Gallery.eventListeners.onTap.bind(this));
 
     if (this.options.lazyLoad) {
-        this.lazyLoader.on('imagesLoaded', this._setWidths.bind(this));
-    } else {
-        window.addEventListener('load', this);
+        this.lazyLoader.on('imagesLoaded', this._setDimensions.bind(this));
     }
 
 };

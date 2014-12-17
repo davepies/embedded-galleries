@@ -52,6 +52,9 @@ $egLoaderSize: 40px;
 
     cursor: -webkit-grabbing;
 
+    transition: all .25s ease;
+
+
     &:last-child {
         padding-right: 0;
     }
@@ -59,8 +62,22 @@ $egLoaderSize: 40px;
     img {
         display: block;
         border-radius: 4px;
-        max-height: 100%;
-        width: auto;
+        &[src] {
+            transition: width 5s ease;
+            max-height: 100%;
+            width: auto;
+        }
+    }
+
+    &:after {
+        content: '';
+        position: absolute;
+        opacity: 0;
+        transition: all 1s ease;
+        top: 0;
+        bottom: 0;
+        right: .5em;
+        left: 0;
     }
 
     .EmbeddedGallery.loading & {
@@ -83,6 +100,7 @@ $egLoaderSize: 40px;
         &:after {
             content: '';
             position: absolute;
+            opacity: 1;
             background: white;
             top: 0;
             bottom: 0;
